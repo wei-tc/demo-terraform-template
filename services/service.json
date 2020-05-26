@@ -1,0 +1,79 @@
+[
+  {
+    "name": "dashboard",
+    "image": "**********.dkr.ecr.us-west-2.amazonaws.com/dashboard:latest",
+    "cpu": 10,
+    "memoryReservation": 100,
+    "essential": true,
+    "environmentFiles": [
+      {
+        "value": "arn:aws:s3:::wei-tc-demo-env/wei-tc-demo.env",
+        "type": "s3"
+      }
+    ],
+    "portMappings": [
+      {
+        "containerPort": 8000,
+        "hostPort": 8000
+      }
+    ],
+    "mountPoints": [
+      {
+        "sourceVolume": "static_volume",
+        "containerPath": "/dashboard/staticfiles"
+      },
+      {
+        "sourceVolume": "media_volume",
+        "containerPath": "/dashboard/media/production"
+      }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "wei-tc-demo-logs",
+        "awslogs-region": "us-west-2",
+        "awslogs-stream-prefix": "dashboard-container"
+      }
+    }
+  },
+  {
+    "name": "nginx",
+    "image": "********.dkr.ecr.us-west-2.amazonaws.com/nginx:latest",
+    "cpu": 10,
+    "memoryReservation": 100,
+    "essential": true,
+    "portMappings": [
+      {
+        "containerPort": 80,
+        "hostPort": 80
+      }
+    ],
+    "mountPoints": [
+      {
+        "sourceVolume": "static_volume",
+        "containerPath": "/dashboard/staticfiles"
+      },
+      {
+        "sourceVolume": "media_volume",
+        "containerPath": "/dashboard/media/production"
+      }
+    ],
+    "dependsOn": [
+      {
+        "containerName": "dashboard",
+        "condition": "START"
+      }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "wei-tc-demo-logs",
+        "awslogs-region": "us-west-2",
+        "awslogs-stream-prefix": "nginx-container"
+      }
+    },
+    "links": [
+        "dashboard:dashboard"
+    ]
+  }
+]
