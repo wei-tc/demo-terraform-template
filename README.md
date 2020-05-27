@@ -4,7 +4,6 @@
 - S3 buckets for storing staticfiles, uploaded media, terraform state and secrets (environment file)
 - Task definitions for dashboard app and nginx containers, with images stored on ECR
 
-<br/><br/>
 
 ## To use
 1. Replace project name, tf bucket name and DynamoDB table in ./global/variables/outputs.tf
