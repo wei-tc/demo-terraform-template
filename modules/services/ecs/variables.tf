@@ -44,10 +44,10 @@ variable "container_name" {
   type = string
 }
 
-variable "ecs-task-execution-s3-env-policy" {
+variable "ecs_task_execution_s3_env_policy" {
   type = string
 }
 
-variable "ecs-task-s3-static-policy" {
+variable "ecs_task_s3_static_policy" {
   type = string
 }

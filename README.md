@@ -1,8 +1,9 @@
 # AWS Template for demo site
 ## Features
 - VPC containing ECS ASG (only 1 EC2 instance) with ALB in public subnet, and MySQL RDS in private subnet
-- S3 buckets for storing staticfiles, uploaded media, terraform state and secrets (environment file)
+- S3 buckets for storing uploaded media, terraform state and secrets (environment file)
 - Task definitions for dashboard app and nginx containers, with images stored on ECR
+- CloudFront for static files
 
 
 ## To use

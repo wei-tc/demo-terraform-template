@@ -18,13 +18,6 @@ module "global_variables" {
   source = "../global/variables"
 }
 
-data "template_file" "s3_public_policy" {
-  template = file("../modules/services/s3/s3-public-policy.json")
-  vars = {
-    bucket = module.global_variables.project_name
-  }
-}
-
 module "staticfiles" {
   source = "../modules/services/s3"
 
@@ -42,6 +35,13 @@ module "staticfiles" {
   s3_policy = data.template_file.s3_public_policy.rendered
 }
 
+data "template_file" "s3_public_policy" {
+  template = file("../modules/services/s3/s3-public-policy.json")
+  vars = {
+    bucket = module.global_variables.project_name
+  }
+}
+
 resource "aws_s3_bucket" "www_redirect" {
   bucket = "www.${module.global_variables.project_name}"
   acl = "public-read"
@@ -53,6 +53,27 @@ resource "aws_s3_bucket" "www_redirect" {
   tags = {
     project = module.global_variables.project_name
   }
+}
+
+module "demo" {
+  source = "../modules/services/ecs"
+
+  project_name = module.global_variables.project_name
+  public_security_group_id = data.aws_security_group.public.id
+  public_subnet_ids = data.aws_subnet_ids.public.ids
+  vpc_id = data.aws_vpc.main.id
+
+  ecs_key_pair_name = file("key-pair.env")
+
+  container_definitions = data.template_file.service.rendered
+  family = "demo"
+  service_name = "demo"
+  container_name = "nginx"
+  desired_service_count = 1
+  volume_name = ["static_volume", "media_volume"]
+
+  ecs_task_execution_s3_env_policy = data.template_file.ecs-task-execution-s3-env-read.rendered
+  ecs_task_s3_static_policy = data.template_file.ecs-task-s3-static-readwrite.rendered
 }
 
 data "template_file" "ecs-task-s3-static-readwrite" {
@@ -68,25 +89,11 @@ data "template_file" "ecs-task-execution-s3-env-read" {
   }
 }
 
-module "demo" {
-  source = "../modules/services/ecs"
-
-  project_name = module.global_variables.project_name
-  public_security_group_id = data.aws_security_group.public.id
-  public_subnet_ids = data.aws_subnet_ids.public.ids
-  vpc_id = data.aws_vpc.main.id
-
-  ecs_key_pair_name = file("key-pair.env")
-
-  container_definitions = file("service.json")
-  family = "demo"
-  service_name = "demo"
-  container_name = "nginx"
-  desired_service_count = 1
-  volume_name = ["static_volume", "media_volume"]
-
-  ecs-task-execution-s3-env-policy = data.template_file.ecs-task-execution-s3-env-read.rendered
-  ecs-task-s3-static-policy = data.template_file.ecs-task-s3-static-readwrite.rendered
+data "template_file" "service" {
+  template = file("service.json")
+  vars = {
+    cloudfront_domain_name = module.aws_cloudfront.domain_name
+  }
 }
 
 data "aws_security_group" "public" {
@@ -123,4 +130,13 @@ data "aws_vpc" "main" {
       module.global_variables.project_name
     ]
   }
+}
+
+module "aws_cloudfront" {
+  source = "../modules/services/cloudfront"
+
+  origin_id = module.demo.lb_id
+  origin_domain_name = module.demo.lb_dns_name
+
+  project_name = module.global_variables.project_name
 }

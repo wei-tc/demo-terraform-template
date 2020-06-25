@@ -1,10 +1,16 @@
 [
   {
     "name": "dashboard",
-    "image": "**********.dkr.ecr.us-west-2.amazonaws.com/dashboard:latest",
+    "image": ".dkr.ecr.us-west-2.amazonaws.com/dashboard:latest",
     "cpu": 10,
     "memoryReservation": 100,
     "essential": true,
+    "environment": [
+      {
+        "name": "CLOUDFRONT_STATIC_HOST",
+        "value": "https://${cloudfront_domain_name}"
+      }
+    ],
     "environmentFiles": [
       {
         "value": "arn:aws:s3:::wei-tc-demo-env/wei-tc-demo.env",
@@ -15,16 +21,6 @@
       {
         "containerPort": 8000,
         "hostPort": 8000
-      }
-    ],
-    "mountPoints": [
-      {
-        "sourceVolume": "static_volume",
-        "containerPath": "/dashboard/staticfiles"
-      },
-      {
-        "sourceVolume": "media_volume",
-        "containerPath": "/dashboard/media/production"
       }
     ],
     "logConfiguration": {
@@ -38,7 +34,7 @@
   },
   {
     "name": "nginx",
-    "image": "********.dkr.ecr.us-west-2.amazonaws.com/nginx:latest",
+    "image": ".dkr.ecr.us-west-2.amazonaws.com/nginx:latest",
     "cpu": 10,
     "memoryReservation": 100,
     "essential": true,
@@ -46,16 +42,6 @@
       {
         "containerPort": 80,
         "hostPort": 80
-      }
-    ],
-    "mountPoints": [
-      {
-        "sourceVolume": "static_volume",
-        "containerPath": "/dashboard/staticfiles"
-      },
-      {
-        "sourceVolume": "media_volume",
-        "containerPath": "/dashboard/media/production"
       }
     ],
     "dependsOn": [

@@ -198,7 +198,7 @@ resource "aws_iam_role" "ecs_task" {
 
 resource "aws_iam_role_policy" "s3_static_readwrite" {
   name = "ecs-task-static"
-  policy = var.ecs-task-s3-static-policy
+  policy = var.ecs_task_s3_static_policy
   role = aws_iam_role.ecs_task.id
 }
 
@@ -226,6 +226,6 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
 
 resource "aws_iam_role_policy" "s3_env_read" {
   name = "ecs-task-env"
-  policy = var.ecs-task-execution-s3-env-policy
+  policy = var.ecs_task_execution_s3_env_policy
   role = aws_iam_role.ecs_task_execution.id
 }
