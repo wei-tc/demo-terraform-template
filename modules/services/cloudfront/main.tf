@@ -72,6 +72,11 @@ resource "aws_cloudfront_distribution" "main" {
     cloudfront_default_certificate = true
   }
 
+  logging_config {
+    bucket = var.s3_logging_bucket
+    prefix = var.project_name
+  }
+
   tags = {
     project = var.project_name
   }

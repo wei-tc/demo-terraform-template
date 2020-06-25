@@ -139,4 +139,5 @@ module "aws_cloudfront" {
   origin_domain_name = module.demo.lb_dns_name
 
   project_name = module.global_variables.project_name
+  s3_logging_bucket = module.staticfiles.bucket_domain_name
 }

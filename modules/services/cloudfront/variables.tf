@@ -10,3 +10,7 @@ variable "origin_domain_name" {
 variable "origin_id" {
   type = string
 }
+
+variable "s3_logging_bucket" {
+  type = string
+}
