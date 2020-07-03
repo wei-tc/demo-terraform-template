@@ -25,10 +25,16 @@ module "staticfiles" {
   s3_bucket_name = module.global_variables.project_name
 
   cors_rule = {
-    allowed_headers = ["*"]
-    allowed_methods = ["POST", "PUT", "DELETE"]
-    allowed_origins = ["*"]
-    expose_headers = ["ETag"]
+    allowed_headers = [
+      "*"]
+    allowed_methods = [
+      "POST",
+      "PUT",
+      "DELETE"]
+    allowed_origins = [
+      "*"]
+    expose_headers = [
+      "ETag"]
     max_age_seconds = 3000
   }
 
@@ -70,7 +76,12 @@ module "demo" {
   service_name = "demo"
   container_name = "nginx"
   desired_service_count = 1
-  volume_name = ["static_volume", "media_volume"]
+  deployment_minimum_percent = 0
+  deployment_maximum_percent = 200
+  ordered_placement_strategy = {
+    type = "spread"
+    field = "instanceId"
+  }
 
   ecs_task_execution_s3_env_policy = data.template_file.ecs-task-execution-s3-env-read.rendered
   ecs_task_s3_static_policy = data.template_file.ecs-task-s3-static-readwrite.rendered

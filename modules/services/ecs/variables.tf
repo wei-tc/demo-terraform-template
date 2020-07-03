@@ -30,6 +30,7 @@ variable "family" {
 
 variable "volume_name" {
   type = list(string)
+  default = []
 }
 
 variable "service_name" {
@@ -38,6 +39,26 @@ variable "service_name" {
 
 variable "desired_service_count" {
   type = number
+}
+
+variable "deployment_minimum_percent" {
+  type = number
+}
+
+variable "deployment_maximum_percent" {
+  type = number
+}
+
+variable "ordered_placement_strategy" {
+  type = object({
+    type = string
+    field = string
+  })
+  default = {
+    type = "random"
+    field = ""
+  }
+
 }
 
 variable "container_name" {

@@ -63,8 +63,8 @@ resource "aws_autoscaling_group" "main" {
 }
 
 resource "aws_launch_configuration" "main" {
-  name = "${var.project_name}-launch-configuration"
-  image_id = "ami-088bb4cd2f62fc0e1" # Amazon ECS-optimized Amazon Linux 2 AMI
+  name_prefix = var.project_name
+  image_id = data.aws_ssm_parameter.ami.value
   instance_type = "t2.micro"
   iam_instance_profile = aws_iam_instance_profile.ecs_instance.id
 
@@ -81,6 +81,10 @@ resource "aws_launch_configuration" "main" {
   }
 }
 
+data "aws_ssm_parameter" "ami" {
+  name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id"
+}
+
 resource "aws_ecs_cluster" "cluster" {
   name = "${var.project_name}-ecs-cluster"
 }
@@ -89,18 +93,26 @@ resource "aws_ecs_service" "service" {
   name = "${var.service_name}-ecs-service"
   task_definition = aws_ecs_task_definition.task.arn
   cluster = aws_ecs_cluster.cluster.id
+  deployment_minimum_healthy_percent = var.deployment_minimum_percent
   desired_count = var.desired_service_count
+  deployment_maximum_percent = var.deployment_maximum_percent
   iam_role = aws_iam_role.ecs_service.name
   force_new_deployment = true
 
   load_balancer {
     target_group_arn = aws_lb_target_group.main.arn
-    container_port = 80
     container_name = var.container_name
+    container_port = 80
+  }
+
+  ordered_placement_strategy {
+    type = var.ordered_placement_strategy.type
+    field = var.ordered_placement_strategy.field
   }
 
   depends_on = [
-    aws_lb.main
+    aws_lb.main,
+    aws_iam_role.ecs_service
   ]
 }
 

@@ -89,6 +89,24 @@ resource "aws_security_group" "private" {
   description = "RDS"
   vpc_id = aws_vpc.main.id
 
+  egress {
+    description = "HTTP"
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = [
+      "0.0.0.0/0"]
+  }
+
+  egress {
+    description = "HTTPS"
+    from_port = 443
+    to_port = 443
+    protocol = "tcp"
+    cidr_blocks = [
+      "0.0.0.0/0"]
+  }
+
   tags = {
     project = var.project_name
     private = true
